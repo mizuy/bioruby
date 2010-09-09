@@ -328,20 +328,34 @@ class Report
       [ query_start, query_end, target_start, target_end ]
     end
 
+    def al_cons
+      @target.al_cons
+    end
+
 
     class Query
       def initialize(data)
         @definition, *data = data.split(/\n/)
         @data = {}
         @sequence = ''
+        @al_cons = ''
 
         pat = /;\s+([^:]+):\s+(.*)/
+        ac  = /;\s+al_cons:\s*/
 
+        al_cons = false
         data.each do |x|
           if pat.match(x)
+            al_cons = false
             @data[$1] = $2
+          elsif ac.match(x)
+            al_cons = true
           else
-            @sequence += x
+            if al_cons
+              @al_cons += x
+            else
+              @sequence += x
+            end
           end
         end
       end
@@ -358,6 +372,10 @@ class Report
       # Returns the sequence (with gaps) as a String.
       # You can access this value by the Report::Hit#query_seq method.
       attr_reader :sequence
+
+      # Return the al_cons as a String
+      # You can access this value by the Report::Hit##al_cons method.
+      attr_reader :al_cons
 
       # Returns the first word in the definition as a String.
       # You can get this value by Report::Hit#query_id method.
